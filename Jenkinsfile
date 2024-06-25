@@ -22,7 +22,7 @@ pipeline {
             steps {
                 script {
                     // Run the server in the background
-                    sh 'nohup . venv/bin/activate && python server.py &'
+                    sh 'nohup . venv/bin/activate && python server/server.py &'
                     // Sleep to give the server time to start
                     sleep 5
                 }
@@ -33,7 +33,7 @@ pipeline {
             steps {
                 script {
                     // Run the client in the background
-                    sh 'nohup . venv/bin/activate && python client.py &'
+                    sh 'nohup . venv/bin/activate && python client/client.py &'
                     // Sleep to give the client time to connect to the server
                     sleep 5
                 }
@@ -44,7 +44,7 @@ pipeline {
             steps {
                 script {
                     // Run the system tests using pytest
-                    sh '. venv/bin/activate && pytest > system_test_results.log'
+                    sh '. venv/bin/activate && pytest system_tests/test_system.py > system_test_results.log'
                 }
             }
         }
