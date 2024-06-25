@@ -1,6 +1,6 @@
 {
 	"server_host1": "server-container",
 	"server_host2": "127.0.0.1",
-	"server_host": "172.18.0.3",
+	"server_host": "localhost",
 	"server_port": 9999
 }

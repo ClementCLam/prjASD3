@@ -1,53 +1,49 @@
-import os
-import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-import unittest
-import subprocess
 import socket
+import json
+import os
 import time
-import threading
+import pytest
 
-class TestClientServerInteraction(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.server_process = subprocess.Popen(["python", "server/server.py", "--user-socket"])
-        time.sleep(1)  # Give the server some time to start
+# Load server and client configurations
+def load_server_config():
+    config_path = os.path.join(os.path.dirname(__file__), 'server_config.json')
+    with open(config_path) as config_json:
+        config = json.load(config_json)
+    return config
 
-    @classmethod
-    def tearDownClass(cls):
-        cls.server_process.terminate()
-        cls.server_process.wait()
+def load_client_config():
+    config_path = os.path.join(os.path.dirname(__file__), 'client_config.json')
+    with open(config_path) as config_json:
+        config = json.load(config_json)
+    return config
 
-    def test_client_server_interaction(self):
-        client_process = subprocess.Popen(["python", "client/client.py"], 
-                                          stdin=subprocess.PIPE, 
-                                          stdout=subprocess.PIPE, 
-                                          stderr=subprocess.PIPE,
-                                          text=True
-        )
-        #client_process = subprocess.Popen(["python", "client/client.py"])
+@pytest.fixture(scope='module')
+def server():
+    config = load_server_config()
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind((config['host'], config['port']))
+    server_socket.listen(5)
+    yield server_socket
+    server_socket.close()
 
-        # Connect to the server to simulate client sending commands
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.connect(("127.0.0.1", 9999))
-            s.sendall(b"explore 172.18.0.3 .\n")
-            response = s.recv(4096).decode()
-            print('response: ',response)
-            print('length of response: ',len(response))
-            s.sendall(b"bye\n")
-            
-        client_process.terminate()
-        client_process.wait()
+@pytest.fixture(scope='module')
+def client():
+    config = load_client_config()
+    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    client_socket.connect((config['server_host'], config['server_port']))
+    yield client_socket
+    client_socket.close()
 
-        #self.assertIn("SHA256", response)
-        #self.assertIn("Modification Time", response)
-        #self.assertFalse("Modification Time" in response)
-        self.assertIn("explore 172.18.0.3 .", response)
+def test_explore_existing_directory(client):
+    command = 'explore 1 /path/to/existing/directory'
+    client.send(command.encode())
+    response = client.recv(4096).decode()
+    assert 'Directory is empty.' not in response
+    assert 'Error:' not in response
 
-
-    
-
-if __name__ == "__main__":
-    unittest.main()
+def test_explore_non_existing_directory(client):
+    command = 'explore 1 /path/to/non/existing/directory'
+    client.send(command.encode())
+    response = client.recv(4096).decode()
+    assert 'Error: Directory' in response
     
