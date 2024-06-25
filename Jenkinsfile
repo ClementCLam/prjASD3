@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent none
 
     stages {
 /*         stage('Clone Repository') {
@@ -7,7 +7,7 @@ pipeline {
                 // Clone the GitHub repository
                 git 'https://github.com/ClementCLam/prjASD3.git'
             }
-        } */
+        }
 
         stage('Install Python') {
             steps {
@@ -17,9 +17,15 @@ pipeline {
                     apt-get clean
                 '''
             }
-        }
+        } */
 
         stage('Set Up Environment') {
+            agent {
+                docker {
+                    image 'python:3.9'
+                    args '-u root' // Run as root user inside the container
+                }
+            }
             steps {
                 // Set up a Python virtual environment and install dependencies
                 sh 'python3 -m venv venv'
@@ -29,6 +35,12 @@ pipeline {
         }
 
         stage('Run Server') {
+            agent {
+                docker {
+                    image 'python:3.9'
+                    args '-u root' // Run as root user inside the container
+                }
+            }            
             steps {
                 script {
                     // Run the server in the background
@@ -40,6 +52,12 @@ pipeline {
         }
 
         stage('Run Client') {
+            agent {
+                docker {
+                    image 'python:3.9'
+                    args '-u root' // Run as root user inside the container
+                }
+            }            
             steps {
                 script {
                     // Run the client in the background
@@ -51,6 +69,12 @@ pipeline {
         }
 
         stage('Run System Tests') {
+            agent {
+                docker {
+                    image 'python:3.9'
+                    args '-u root' // Run as root user inside the container
+                }
+            }            
             steps {
                 script {
                     // Run the system tests using pytest
@@ -60,6 +84,12 @@ pipeline {
         }
 
         stage('Cleanup') {
+            agent {
+                docker {
+                    image 'python:3.9'
+                    args '-u root' // Run as root user inside the container
+                }
+            }            
             steps {
                 // Clean up the environment (e.g., kill the server)
                 sh 'pkill -f server.py'
