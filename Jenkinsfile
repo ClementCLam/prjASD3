@@ -2,12 +2,12 @@ pipeline {
     agent any
 
     stages {
-        stage('Clone Repository') {
+/*         stage('Clone Repository') {
             steps {
                 // Clone the GitHub repository
                 git 'https://github.com/ClementCLam/prjASD3.git'
             }
-        }
+        } */
 
         stage('Set Up Environment') {
             steps {
