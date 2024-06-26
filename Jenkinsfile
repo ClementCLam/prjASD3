@@ -7,7 +7,7 @@ pipeline {
                 // Clone the GitHub repository
                 git 'https://github.com/ClementCLam/prjASD3.git'
             }
-        } */
+        }
 
         stage('Install Python') {
             steps {
@@ -18,7 +18,7 @@ pipeline {
                     sudo apt-get clean
                 '''
             }
-        }
+        } */
 
         stage('Set Up Environment') {
             steps {
