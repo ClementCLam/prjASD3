@@ -6,13 +6,13 @@ import pytest
 
 # Load server and client configurations
 def load_server_config():
-    config_path = os.path.join(os.path.dirname(__file__), 'server_config.json')
+    config_path = os.path.join(os.path.dirname(__file__), 'server/server_config.json')
     with open(config_path) as config_json:
         config = json.load(config_json)
     return config
 
 def load_client_config():
-    config_path = os.path.join(os.path.dirname(__file__), 'client_config.json')
+    config_path = os.path.join(os.path.dirname(__file__), 'client/client_config.json')
     with open(config_path) as config_json:
         config = json.load(config_json)
     return config
