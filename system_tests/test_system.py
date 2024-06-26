@@ -4,6 +4,7 @@ import os
 import time
 import unittest
 import logging
+import subprocess
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -28,10 +29,9 @@ class SystemTest(unittest.TestCase):
         cls.server_config = load_server_config()
         cls.client_config = load_client_config()
 
-        # Setup server
-        cls.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        cls.server_socket.bind((cls.server_config['host'], cls.server_config['port']))
-        cls.server_socket.listen(5)
+        # Start the server process
+        cls.server_process = subprocess.Popen(['python3', 'server/server.py'])
+        time.sleep(5)  # Give the server time to start
 
         # Setup client
         cls.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -39,8 +39,9 @@ class SystemTest(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        cls.server_socket.close()
         cls.client_socket.close()
+        cls.server_process.terminate()
+        cls.server_process.wait()
 
     def test_explore_existing_directory(self):
         logging.info("Starting test: explore_existing_directory")

@@ -20,7 +20,7 @@ pipeline {
             }
         } */
 
-        stage('Run Server') {
+/*         stage('Run Server') {
             steps {
                 script {
                     // Run the server in the background
@@ -44,7 +44,7 @@ pipeline {
                     sleep 5
                 }
             }
-        }
+        } */
 
         stage('Run System Tests') {
             steps {
@@ -57,7 +57,7 @@ pipeline {
             }
         }
 
-        stage('Cleanup') {
+/*         stage('Cleanup') {
             steps {
                 // Clean up the environment (e.g., kill the server)
                 sh '''
@@ -65,7 +65,7 @@ pipeline {
                     pkill -f client.py || true
                 '''
             }
-        }
+        } */
     }
 
     post {
