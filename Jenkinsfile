@@ -51,7 +51,7 @@ pipeline {
                 script {
                     // Run the system tests using pytest
                     sh '''
-                        pytest system_tests/test_system.py > system_test_results.log
+                        python3 -m unittest discover -s system_tests -p 'test_system.py' > system_test_results.log
                     '''
                 }
             }

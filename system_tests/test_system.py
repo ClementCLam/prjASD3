@@ -2,48 +2,64 @@ import socket
 import json
 import os
 import time
-import pytest
+import unittest
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
 # Load server and client configurations
 def load_server_config():
-    config_path = os.path.join(os.path.dirname(__file__), 'server/server_config.json')
+    config_path = os.path.join(os.path.dirname(__file__), '../server/server_config.json')
     with open(config_path) as config_json:
         config = json.load(config_json)
     return config
 
 def load_client_config():
-    config_path = os.path.join(os.path.dirname(__file__), 'client/client_config.json')
+    config_path = os.path.join(os.path.dirname(__file__), '../client/client_config.json')
     with open(config_path) as config_json:
         config = json.load(config_json)
     return config
 
-@pytest.fixture(scope='module')
-def server():
-    config = load_server_config()
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server_socket.bind((config['host'], config['port']))
-    server_socket.listen(5)
-    yield server_socket
-    server_socket.close()
+class SystemTest(unittest.TestCase):
 
-@pytest.fixture(scope='module')
-def client():
-    config = load_client_config()
-    client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    client_socket.connect((config['server_host'], config['server_port']))
-    yield client_socket
-    client_socket.close()
+    @classmethod
+    def setUpClass(cls):
+        cls.server_config = load_server_config()
+        cls.client_config = load_client_config()
 
-""" def test_explore_existing_directory(client):
-    command = 'explore 1 /path/to/existing/directory'
-    client.send(command.encode())
-    response = client.recv(4096).decode()
-    assert 'Directory is empty.' not in response
-    assert 'Error:' not in response
+        # Setup server
+        cls.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        cls.server_socket.bind((cls.server_config['host'], cls.server_config['port']))
+        cls.server_socket.listen(5)
 
-def test_explore_non_existing_directory(client):
-    command = 'explore 1 /path/to/non/existing/directory'
-    client.send(command.encode())
-    response = client.recv(4096).decode()
-    assert 'Error: Directory' in response
-     """
+        # Setup client
+        cls.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        cls.client_socket.connect((cls.client_config['server_host'], cls.client_config['server_port']))
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.server_socket.close()
+        cls.client_socket.close()
+
+    def test_explore_existing_directory(self):
+        logging.info("Starting test: explore_existing_directory")
+        command = 'explore 1 /path/to/existing/directory'
+        self.client_socket.send(command.encode())
+        response = self.client_socket.recv(4096).decode()
+        logging.info("Received response: %s", response)
+        self.assertNotIn('Directory is empty.', response)
+        self.assertNotIn('Error:', response)
+        logging.info("Completed test: explore_existing_directory")
+
+    def test_explore_non_existing_directory(self):
+        logging.info("Starting test: explore_non_existing_directory")
+        command = 'explore 1 /path/to/non/existing/directory'
+        self.client_socket.send(command.encode())
+        response = self.client_socket.recv(4096).decode()
+        logging.info("Received response: %s", response)
+        self.assertIn('Error: Directory', response)
+        logging.info("Completed test: explore_non_existing_directory")
+
+if __name__ == '__main__':
+    unittest.main()
