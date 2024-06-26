@@ -9,24 +9,31 @@ pipeline {
             }
         }
 
-        stage('Set Up Environment') {
+        stage('Install Python') {
             steps {
-                // Use ShiningPanda to set up Python environment
-                withPythonEnv('Python 3') {
-                    // Install dependencies
-                    sh 'pip install -r requirements.txt'
-                    sh 'pip install pytest'
-                }
+                sh '''
+                    apt-get update && apt-get install -y sudo
+                    sudo apt-get update
+                    sudo apt-get install -y python3 python3-venv python3-pip
+                    sudo apt-get clean
+                '''
             }
         } */
+
+        stage('Set Up Environment') {
+            steps {
+                // Set up a Python virtual environment and install dependencies
+                sh 'python3 -m venv venv'
+                sh '. venv/bin/activate && pip install -r requirements.txt'
+                sh '. venv/bin/activate && pip install pytest' // Install pytest
+            }
+        }
 
         stage('Run Server') {
             steps {
                 script {
                     // Run the server in the background
-                    sh '''
-                        nohup python3 server/server.py &
-                    '''
+                    sh 'nohup . venv/bin/activate && python server/server.py &'
                     // Sleep to give the server time to start
                     sleep 5
                 }
@@ -37,9 +44,7 @@ pipeline {
             steps {
                 script {
                     // Run the client in the background
-                    sh '''
-                        nohup python3 client/client.py &
-                    '''
+                    sh 'nohup . venv/bin/activate && python client/client.py &'
                     // Sleep to give the client time to connect to the server
                     sleep 5
                 }
@@ -50,9 +55,7 @@ pipeline {
             steps {
                 script {
                     // Run the system tests using pytest
-                    sh '''
-                        pytest system_tests/test_system.py > system_test_results.log
-                    '''
+                    sh '. venv/bin/activate && pytest system_tests/test_system.py > system_test_results.log'
                 }
             }
         }
@@ -60,10 +63,8 @@ pipeline {
         stage('Cleanup') {
             steps {
                 // Clean up the environment (e.g., kill the server)
-                sh '''
-                    pkill -f server.py || true
-                    pkill -f client.py || true
-                '''
+                sh 'pkill -f server.py'
+                sh 'pkill -f client.py'
             }
         }
     }
