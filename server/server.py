@@ -32,6 +32,7 @@ def handle_client(client_socket):
         client_socket.close()
  """
 
+
 def main():
     config = load_config()
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -43,11 +44,10 @@ def main():
         while True:
             client_socket, _ = server_socket.accept()
             print(f"[+] Accepted connection from {client_socket.getpeername()}")
-            handle_client(client_socket)    
-            #client_handler = threading.Thread(target=handle_client, args=(client_socket,))
-            #client_handler.start()
+            #handle_client(client_socket)    
+            client_handler = threading.Thread(target=handle_client, args=(client_socket,))
+            client_handler.start()
     except KeyboardInterrupt:
         print("[!] Server shutting down...")
-
 if __name__ == "__main__":
     main()
