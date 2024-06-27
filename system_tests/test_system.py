@@ -13,12 +13,12 @@ class SystemTest(unittest.TestCase):
     def setUpClass(cls):
         # Start the server process
         logging.info("Start server process")        
-        cls.server_process = subprocess.Popen(['python3', 'server/server.py'])
+        cls.server_process = subprocess.Popen(['python3', '../server/server.py'])
         time.sleep(5)  # Give the server time to start
 
         # Start the client process
         logging.info("Start client process") 
-        cls.client_process = subprocess.Popen(['python3', 'client/client.py'])
+        cls.client_process = subprocess.Popen(['python3', '../client/client.py'])
         time.sleep(5)  # Give the client time to connect to the server
 
         # Setup client socket for sending commands
