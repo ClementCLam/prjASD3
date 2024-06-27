@@ -12,20 +12,24 @@ class SystemTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         # Start the server process
+        logging.info("Start server process")        
         cls.server_process = subprocess.Popen(['python3', 'server/server.py'])
         time.sleep(5)  # Give the server time to start
 
         # Start the client process
+        logging.info("Start client process") 
         cls.client_process = subprocess.Popen(['python3', 'client/client.py'])
         time.sleep(5)  # Give the client time to connect to the server
 
         # Setup client socket for sending commands
         # The host and port should match what is in the server_config.json
+        logging.info("Setup client socket") 
         cls.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         cls.client_socket.connect(('localhost', 9999))  # Change this if the config uses different host and port
 
     @classmethod
     def tearDownClass(cls):
+        logging.info("enter tearDownClass") 
         cls.client_socket.close()
         cls.client_process.terminate()
         cls.client_process.wait()
