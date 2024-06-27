@@ -5,7 +5,7 @@ import logging
 import subprocess
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', filename='system_test.log', filemode='w')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s', filename='system_test.log', filemode='w')
 
 class SystemTest(unittest.TestCase):
 
