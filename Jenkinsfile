@@ -71,7 +71,7 @@ pipeline {
     post {
         always {
             // Archive the test results and any other relevant files
-            archiveArtifacts artifacts: '**/*.log', allowEmptyArchive: true
+            archiveArtifacts artifacts: 'system_test.log', allowEmptyArchive: true
             // Clean up the workspace
             cleanWs()
         }

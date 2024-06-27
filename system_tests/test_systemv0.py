@@ -1,34 +1,45 @@
 import socket
+import json
+import os
 import time
 import unittest
 import logging
 import subprocess
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s', filename='system_test.log', filemode='w')
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
+
+# Load server and client configurations
+def load_server_config():
+    config_path = os.path.join(os.path.dirname(__file__), '../server/server_config.json')
+    with open(config_path) as config_json:
+        config = json.load(config_json)
+    return config
+
+def load_client_config():
+    config_path = os.path.join(os.path.dirname(__file__), '../client/client_config.json')
+    with open(config_path) as config_json:
+        config = json.load(config_json)
+    return config
 
 class SystemTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.server_config = load_server_config()
+        cls.client_config = load_client_config()
+
         # Start the server process
         cls.server_process = subprocess.Popen(['python3', 'server/server.py'])
         time.sleep(5)  # Give the server time to start
 
-        # Start the client process
-        cls.client_process = subprocess.Popen(['python3', 'client/client.py'])
-        time.sleep(5)  # Give the client time to connect to the server
-
-        # Setup client socket for sending commands
-        # The host and port should match what is in the server_config.json
+        # Setup client
         cls.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        cls.client_socket.connect(('localhost', 9999))  # Change this if the config uses different host and port
+        cls.client_socket.connect((cls.client_config['server_host'], cls.client_config['server_port']))
 
     @classmethod
     def tearDownClass(cls):
         cls.client_socket.close()
-        cls.client_process.terminate()
-        cls.client_process.wait()
         cls.server_process.terminate()
         cls.server_process.wait()
 
